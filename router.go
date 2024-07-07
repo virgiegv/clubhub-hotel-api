@@ -29,6 +29,12 @@ func (r *Router) Init() {
 			companyGroup.GET("/", controllers.GetCompanyByFilters)
 			companyGroup.GET("/:company_id", controllers.GetCompanyById)
 			companyGroup.PUT("/:company_id", controllers.UpdateCompany)
+		}
+		var franchiseGroup = basePath.Group("/franchise")
+		{
+			franchiseGroup.POST("", controllers.CreateFranchise)
+			franchiseGroup.GET("/", controllers.GetFranchiseByFilters)
+			franchiseGroup.GET("/:franchise_id", controllers.GetFranchiseById)
 
 		}
 	}

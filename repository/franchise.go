@@ -57,16 +57,55 @@ func GetFranchiseById(franchiseId int64) (models.Franchise, error) {
 func GetFranchisesByCompanyId(companyId int64) ([]models.Franchise, error) {
 	db := models.Init().DB
 
-	var franchises []models.Franchise
-	db.Where(&models.Franchise{
-		CompanyId: companyId,
-	}).Find(&franchises)
+	var ids []int64
+	err := db.Model(&models.Franchise{}).
+		Where("company_id = ?", companyId).
+		Pluck("id", &ids).Error
 
-	if len(franchises) <= 0 {
-		return franchises, fmt.Errorf("could not find franchises for company %d", companyId)
+	if err != nil {
+		return []models.Franchise{}, fmt.Errorf("could not find franchises for company %d", companyId)
 	}
 
-	return franchises, nil
+	var result []models.Franchise
+	for _, f := range ids {
+		newFranchise, _ := GetFranchiseById(f)
+		result = append(result, newFranchise)
+	}
+
+	return result, nil
+}
+
+func GetFranchisesByFilters(filters dto.FranchiseSearchFilters) ([]models.Franchise, error) {
+	db := models.Init().DB
+
+	query := db.Model(&models.Franchise{})
+
+	if filters.CompanyId != 0 {
+		query = query.Or("company_id = ?", filters.CompanyId)
+	}
+
+	if filters.FranchiseName != "" {
+		query = query.Or("name ILIKE ?", "%"+filters.FranchiseName+"%")
+	}
+
+	if filters.Url != "" {
+		query = query.Or("url ILIKE ?", "%"+filters.Url+"%")
+	}
+
+	var resultIds []int64
+
+	err := query.Pluck("id", &resultIds).Error
+	if err != nil {
+		return []models.Franchise{}, fmt.Errorf("could not retrieve franchises: %s", err.Error())
+	}
+
+	var result []models.Franchise
+	for _, f := range resultIds {
+		newFranchise, _ := GetFranchiseById(f)
+		result = append(result, newFranchise)
+	}
+
+	return result, nil
 }
 
 func UpdateFranchiseById(updateModel models.Franchise, franchiseId int64) error {

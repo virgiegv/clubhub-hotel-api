@@ -10,6 +10,7 @@ import (
 	"github.com/likexian/whois"
 	whoisparser "github.com/likexian/whois-parser"
 	"net/http"
+	urlPackage "net/url"
 	"time"
 )
 
@@ -30,7 +31,7 @@ func CreateFranchiseWebSiteData(url string, context echo.Context) (models.Franch
 
 	whoIsModel.LogoUrl = getLogoUrl(url)
 
-	err = repository.UpdateWebsiteData(whoIsModel, franchiseWeb.Id)
+	franchiseWeb, err = repository.UpdateWebsiteData(whoIsModel, franchiseWeb.Id)
 	if err != nil {
 		return models.FranchiseWebSite{}, fmt.Errorf(
 			"could not update franchise website data with whoIs and logo information: %s", err.Error(),
@@ -92,20 +93,25 @@ func getURLAnalysis(url string) (dto.AnalysisResponseDTO, error) {
 	return analysisBody, fmt.Errorf("Analysis not yet ready")
 }
 
-type analysisResultDTO struct {
-	RetriesAttempted int
-	Errors           []error
-	ResultDTO        dto.AnalysisResponseDTO
-}
-
 func executeAnalysisWithRetries(url string,
 	retries int,
 	delay time.Duration) (dto.AnalysisResponseDTO, error) {
 
 	var latestError error
 
+	baseURL := "https://api.ssllabs.com/api/v3/analyze"
+
+	analysisURL, err := urlPackage.Parse(baseURL)
+	if err != nil {
+		return dto.AnalysisResponseDTO{}, err
+	}
+
+	q := analysisURL.Query()
+	q.Set("host", url)
+	analysisURL.RawQuery = q.Encode()
+
 	for i := 0; i < retries; i++ {
-		analysisResult, err := getURLAnalysis(url)
+		analysisResult, err := getURLAnalysis(analysisURL.String())
 		if err == nil && analysisResult.Status == "READY" {
 			return analysisResult, nil
 		}
@@ -127,6 +133,7 @@ func executeAnalysisWithRetries(url string,
 }
 
 func getFromWhoIs(url string) (models.FranchiseWebSite, error) {
+
 	raw, err := whois.Whois(url)
 	if err != nil {
 		return models.FranchiseWebSite{}, fmt.Errorf("could not get domain information")
@@ -149,7 +156,7 @@ func getFromWhoIs(url string) (models.FranchiseWebSite, error) {
 		WebsiteCreationDate:   result.Domain.CreatedDate,
 		WebsiteExpirationDate: result.Domain.ExpirationDate,
 		RegisteredTo:          registrant,
-		DomainContactEmail:    "",
+		DomainContactEmail:    result.Registrant.Email,
 	}, nil
 
 }

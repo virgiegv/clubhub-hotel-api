@@ -32,7 +32,9 @@ func Init() *DBConnection {
 			log.Fatalln(err)
 		}
 
-		db.AutoMigrate(&City{}, &Location{}, &Owner{}, &Company{})
+		db.AutoMigrate(
+			&City{}, &Location{}, &Owner{}, &Company{}, &FranchiseWebEndpoint{}, &FranchiseWebSite{}, &Franchise{},
+		)
 
 		sqlDB, err := db.DB()
 		sqlDB.SetMaxOpenConns(50)

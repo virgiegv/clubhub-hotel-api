@@ -15,15 +15,6 @@ func InsertCompany(company models.Company) (models.Company, error) {
 	return company, result.Error
 }
 
-func InsertOwner(owner models.Owner) (models.Owner, error) {
-	db := models.Init().DB
-	result := db.Create(&owner)
-	if result.Error != nil {
-		return models.Owner{}, fmt.Errorf("could not insert owner: %s", result.Error)
-	}
-	return owner, result.Error
-}
-
 func GetCompanyById(companyId int64) (models.Company, error) {
 	db := models.Init().DB
 
@@ -33,6 +24,27 @@ func GetCompanyById(companyId int64) (models.Company, error) {
 	if result.Error != nil {
 		return companyModel, fmt.Errorf("could not find company with id %d", companyId)
 	}
+
+	//Get company location
+	location, err := GetLocationById(companyModel.LocationId)
+	if err != nil {
+		return companyModel, fmt.Errorf("could not find location with id %d", companyModel.LocationId)
+	}
+
+	//Get company owner
+	owner, err := GetOwnerById(companyModel.OwnerId)
+	if err != nil {
+		return companyModel, fmt.Errorf("could not find company owner with id %d", companyModel.OwnerId)
+	}
+
+	companyModel.Location = location
+	companyModel.Owner = owner
+
+	franchises, err := GetFranchisesByCompanyId(companyId)
+	if err != nil {
+		franchises = []models.Franchise{}
+	}
+	companyModel.Franchises = franchises
 
 	return companyModel, nil
 }
@@ -54,7 +66,7 @@ func GetCompanyByFilters(filters dto.CompanySearchFilters) ([]models.Company, er
 	return companyModels, nil
 }
 
-func UpdateCompanyById(companyId int64, newCompany models.Company) (models.Company, error) {
+func UpdateCompanyById(companyId int64, name, taxNumber string) (models.Company, error) {
 	db := models.Init().DB
 
 	var companyModel models.Company
@@ -64,13 +76,13 @@ func UpdateCompanyById(companyId int64, newCompany models.Company) (models.Compa
 		return companyModel, fmt.Errorf("could not find company with id %d", companyId)
 	}
 
-	db.Model(&companyModel).Updates(models.Company{
-		Name:       newCompany.Name,
-		TaxNumber:  newCompany.TaxNumber,
-		LocationId: newCompany.LocationId,
-		OwnerId:    newCompany.OwnerId,
-		//TO DO: do i need to also update structs for location and owner?
+	updateResult := db.Model(&companyModel).Updates(models.Company{
+		Name:      name,
+		TaxNumber: taxNumber,
 	})
+	if updateResult.Error != nil {
+		return companyModel, fmt.Errorf("error updating company: %s", updateResult.Error.Error())
+	}
 
 	return companyModel, nil
 

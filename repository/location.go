@@ -99,3 +99,26 @@ func GetLocationById(locationId int64) (models.Location, error) {
 	location.City = city
 	return location, nil
 }
+
+func UpdateLocation(locationId int64, updateModel models.Location) (models.Location, error) {
+
+	if updateModel.City.Name != "" || updateModel.City.Country != "" {
+		newCity, err := GetOrCreateCity(updateModel.City.Name, updateModel.City.Country)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("could not update location's city or country: %s", err.Error())
+		}
+		updateModel.CityId = newCity.Id
+		updateModel.City = newCity
+	}
+
+	updateModel.Id = locationId
+
+	db := models.Init().DB
+	result := db.Save(&updateModel)
+
+	if result.Error != nil {
+		return models.Location{}, fmt.Errorf("Error updating location: %v\n", result.Error)
+	}
+
+	return updateModel, nil
+}

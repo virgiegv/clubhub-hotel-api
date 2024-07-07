@@ -89,7 +89,7 @@ func CreateEmptyWebsiteData() (models.FranchiseWebSite, error) {
 	return newWebSite, result.Error
 }
 
-func UpdateWebsiteData(updateModel models.FranchiseWebSite, websiteId int64) error {
+func UpdateWebsiteData(updateModel models.FranchiseWebSite, websiteId int64) (models.FranchiseWebSite, error) {
 	db := models.Init().DB
 
 	//UpdateModel will contain initialized values only where it should change
@@ -97,10 +97,10 @@ func UpdateWebsiteData(updateModel models.FranchiseWebSite, websiteId int64) err
 	result := db.Save(&updateModel)
 
 	if result.Error != nil {
-		return fmt.Errorf("Error updating website data: %v\n", result.Error)
+		return models.FranchiseWebSite{}, fmt.Errorf("Error updating website data: %s", result.Error.Error())
 	}
 
-	return nil
+	return updateModel, nil
 }
 
 func GetWebSiteDataById(websiteId int64) (models.FranchiseWebSite, error) {
@@ -143,7 +143,7 @@ func UpdateWebsiteDataWithAnalysis(responseDTO dto.AnalysisResponseDTO, websiteI
 	website.Port = responseDTO.Port
 	website.Protocol = responseDTO.Protocol
 
-	err = UpdateWebsiteData(website, websiteId)
+	_, err = UpdateWebsiteData(website, websiteId)
 	if err != nil {
 		return fmt.Errorf("couldnt update website with initial analysis: %s", err.Error())
 	}

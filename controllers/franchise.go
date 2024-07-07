@@ -7,14 +7,14 @@ import (
 	"net/http"
 )
 
-// CreateCompany godoc
-// @Tags Company
-// @Summary Company Creation
-// @Description Create a company using its name, tax number, owner information, and location
+// CreateFranchise godoc
+// @Tags Franchise
+// @Summary Franchise Creation
+// @Description Create a franchise using its name, url, associated company_id, and location
 // @Produce json
 // @Param companyInfo body dto.CreateFranchiseDTO true "body"
 // @Success 201 {object} models.Franchise
-// @Router /clubhub/api/v1/frqanchise [post]
+// @Router /clubhub/api/v1/franchise [post]
 func CreateFranchise(c echo.Context) error {
 
 	franchiseInfo := dto.CreateFranchiseDTO{}
@@ -26,10 +26,60 @@ func CreateFranchise(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	result, err := services.CreateFranchise(franchiseInfo)
+	result, err := services.CreateFranchise(franchiseInfo, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, result)
+}
+
+// GetFrenchiseById godoc
+// @Tags Franchise
+// @Summary Get franchise by id
+// @Description Find a franchise by its id
+// @Produce json
+// @Param franchise_id path string true "Id of the franchise"
+// @Success 200 {object} models.Franchise
+// @Router /clubhub/api/v1/franchise/{franchise_id} [get]
+func GetFranchiseById(c echo.Context) error {
+	franchise_id := c.Param("franchise_id")
+
+	message := "Buscando por franchise_id: "
+	if franchise_id != "" {
+		message = message + franchise_id
+	}
+
+	franchise, err := services.GetFranchiseById(franchise_id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, franchise)
+}
+
+// GetFranchiseByFilters godoc
+// @Tags Franchise
+// @Summary Franchise search by filters
+// @Description Find a franchise by name, url or associated company_id
+// @Produce json
+// @Param name query string false "Name of the franchise"
+// @Param url query string false "url of the franchise"
+// @Param company_id query string false "id of the company that owns the franchise"
+// @Success 200 {object} []models.Franchise
+// @Router /clubhub/api/v1/franchise/ [get]
+func GetFranchiseByFilters(c echo.Context) error {
+	name := c.QueryParam("name")
+	url := c.QueryParam("url")
+	company_id := c.QueryParam("company_id")
+
+	companies, err := services.GetFranchisesByFilters(name, url, company_id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+	if len(companies) <= 0 {
+		return c.JSON(http.StatusNoContent, companies)
+	}
+
+	return c.JSON(http.StatusOK, companies)
 }

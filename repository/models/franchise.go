@@ -29,7 +29,7 @@ type FranchiseWebSite struct {
 	DomainContactEmail    string                 `json:"domain_contact_email"`
 	Port                  int                    `json:"port"`
 	Protocol              string                 `json:"protocol"`
-	Endpoints             []FranchiseWebEndpoint `json:"endpoints"`
+	Endpoints             []FranchiseWebEndpoint `json:"endpoints" gorm:"foreignKey:WebsiteId"`
 	LatestError           string                 `json:"latest_error"`
 	CreatedAt             time.Time
 	UpdatedAt             time.Time

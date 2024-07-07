@@ -143,13 +143,125 @@
                         "name": "company_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "companyInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateCompanyDTO"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.Company"
+                        }
+                    }
+                }
+            }
+        },
+        "/clubhub/api/v1/franchise": {
+            "post": {
+                "description": "Create a franchise using its name, url, associated company_id, and location",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Franchise"
+                ],
+                "summary": "Franchise Creation",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "companyInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateFranchiseDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Franchise"
+                        }
+                    }
+                }
+            }
+        },
+        "/clubhub/api/v1/franchise/": {
+            "get": {
+                "description": "Find a franchise by name, url or associated company_id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Franchise"
+                ],
+                "summary": "Franchise search by filters",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the franchise",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "url of the franchise",
+                        "name": "url",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of the company that owns the franchise",
+                        "name": "company_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Franchise"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clubhub/api/v1/franchise/{franchise_id}": {
+            "get": {
+                "description": "Find a franchise by its id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Franchise"
+                ],
+                "summary": "Get franchise by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of the franchise",
+                        "name": "franchise_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Franchise"
                         }
                     }
                 }
@@ -191,6 +303,27 @@
                 }
             }
         },
+        "dto.CreateFranchiseDTO": {
+            "type": "object",
+            "required": [
+                "company_id",
+                "url"
+            ],
+            "properties": {
+                "company_id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "$ref": "#/definitions/dto.LocationDTO"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.LocationDTO": {
             "type": "object",
             "properties": {
@@ -224,6 +357,23 @@
                     "$ref": "#/definitions/dto.LocationDTO"
                 },
                 "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateCompanyDTO": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "$ref": "#/definitions/dto.LocationDTO"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "$ref": "#/definitions/dto.OwnerDTO"
+                },
+                "tax_number": {
                     "type": "string"
                 }
             }
@@ -283,10 +433,83 @@
                 "id": {
                     "type": "integer"
                 },
+                "location": {
+                    "$ref": "#/definitions/models.Location"
+                },
+                "locationId": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
                 "url": {
+                    "type": "string"
+                },
+                "websideDataId": {
+                    "type": "integer"
+                },
+                "websiteData": {
+                    "$ref": "#/definitions/models.FranchiseWebSite"
+                }
+            }
+        },
+        "models.FranchiseWebEndpoint": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "ip_address": {
+                    "type": "string"
+                },
+                "server_name": {
+                    "type": "string"
+                },
+                "website_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.FranchiseWebSite": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "domain_contact_email": {
+                    "type": "string"
+                },
+                "endpoints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.FranchiseWebEndpoint"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "latest_error": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "registered_to": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "web_created_at": {
+                    "type": "string"
+                },
+                "web_expires_at": {
                     "type": "string"
                 }
             }

@@ -7,12 +7,6 @@ type CreateCompanyDTO struct {
 	Location  LocationDTO `json:"location" validate:"required"`
 }
 
-/*type FranchiseDTO struct {
-	Name     string      `json:"name"`
-	Url      string      `json:"url"`
-	Location LocationDTO `json:"location"`
-}*/
-
 type LocationDTO struct {
 	Address string `json:"address"`
 	ZipCode string `json:"zip_code"`
