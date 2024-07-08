@@ -185,7 +185,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "body",
-                        "name": "companyInfo",
+                        "name": "franchiseInfo",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -256,6 +256,69 @@ const docTemplate = `{
                     "Franchise"
                 ],
                 "summary": "Get franchise by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of the franchise",
+                        "name": "franchise_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Franchise"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a given franchise's main data and location data. This will not update its website data.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Franchise"
+                ],
+                "summary": "Update franchise data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of the franchise",
+                        "name": "franchise_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "franchiseInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateFranchiseDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Franchise"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Given a franchise id, runs its website data analysis again to update automatically",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Franchise"
+                ],
+                "summary": "Update franchise website data automatically",
                 "parameters": [
                     {
                         "type": "string",
@@ -386,6 +449,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateFranchiseDTO": {
+            "type": "object",
+            "properties": {
+                "company_id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "$ref": "#/definitions/dto.LocationDTO"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "models.City": {
             "type": "object",
             "properties": {
@@ -435,7 +515,7 @@ const docTemplate = `{
         "models.Franchise": {
             "type": "object",
             "properties": {
-                "companyId": {
+                "company_id": {
                     "type": "integer"
                 },
                 "id": {
@@ -444,7 +524,7 @@ const docTemplate = `{
                 "location": {
                     "$ref": "#/definitions/models.Location"
                 },
-                "locationId": {
+                "location_id": {
                     "type": "integer"
                 },
                 "name": {
@@ -453,11 +533,11 @@ const docTemplate = `{
                 "url": {
                     "type": "string"
                 },
-                "websideDataId": {
-                    "type": "integer"
-                },
-                "websiteData": {
+                "website_data": {
                     "$ref": "#/definitions/models.FranchiseWebSite"
+                },
+                "website_data_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -481,10 +561,16 @@ const docTemplate = `{
         "models.FranchiseWebSite": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "domain_contact_email": {
+                    "type": "string"
+                },
+                "domain_created_at": {
+                    "type": "string"
+                },
+                "domain_expires_at": {
                     "type": "string"
                 },
                 "endpoints": {
@@ -511,13 +597,7 @@ const docTemplate = `{
                 "registered_to": {
                     "type": "string"
                 },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "web_created_at": {
-                    "type": "string"
-                },
-                "web_expires_at": {
+                "updated_at": {
                     "type": "string"
                 }
             }

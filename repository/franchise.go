@@ -108,15 +108,15 @@ func GetFranchisesByFilters(filters dto.FranchiseSearchFilters) ([]models.Franch
 	return result, nil
 }
 
-func UpdateFranchiseById(updateModel models.Franchise, franchiseId int64) error {
+func UpdateFranchiseById(updateModel models.Franchise, franchiseId int64) (models.Franchise, error) {
 	db := models.Init().DB
 
 	updateModel.Id = franchiseId
 	result := db.Save(&updateModel)
 
 	if result.Error != nil {
-		return fmt.Errorf("Error updating franchise: %v\n", result.Error)
+		return models.Franchise{}, fmt.Errorf("Error updating franchise: %v\n", result.Error)
 	}
 
-	return nil
+	return updateModel, nil
 }

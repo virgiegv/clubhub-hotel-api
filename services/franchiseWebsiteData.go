@@ -70,11 +70,18 @@ func getURLAnalysis(url string) (dto.AnalysisResponseDTO, error) {
 	analysisBody := dto.AnalysisResponseDTO{}
 	resp, err := http.Get(url)
 
-	if err != nil || resp.StatusCode != http.StatusOK {
+	if err != nil {
 		//No se pudo ejecutar
 		return dto.AnalysisResponseDTO{},
-			fmt.Errorf("request received code <%d> and status error <%s>", resp.StatusCode, err.Error())
+			fmt.Errorf("request received error <%s>", err.Error())
 	} //Si retorno error, voy a intentar de nuevo llamar esta función
+
+	if resp != nil {
+		if resp.StatusCode != http.StatusOK {
+			return dto.AnalysisResponseDTO{},
+				fmt.Errorf("request received code <%d>", resp.StatusCode)
+		}
+	}
 
 	//Ahora, si hay respuesta legible:
 	defer resp.Body.Close()
@@ -159,4 +166,26 @@ func getFromWhoIs(url string) (models.FranchiseWebSite, error) {
 		DomainContactEmail:    result.Registrant.Email,
 	}, nil
 
+}
+
+func UpdateFranchiseWebSiteData(websiteId int64, url string, context echo.Context) (models.FranchiseWebSite, error) {
+	var errors []error
+
+	go ProduceWebsiteAnalysis(websiteId, url, context)
+
+	whoIsModel, err := getFromWhoIs(url)
+	if err != nil {
+		errors = append(errors, err)
+	}
+
+	whoIsModel.LogoUrl = getLogoUrl(url)
+
+	franchiseWeb, err := repository.UpdateWebsiteData(whoIsModel, websiteId)
+	if err != nil {
+		return models.FranchiseWebSite{}, fmt.Errorf(
+			"could not update franchise website data with whoIs and logo information: %s", err.Error(),
+		)
+	}
+
+	return franchiseWeb, nil
 }

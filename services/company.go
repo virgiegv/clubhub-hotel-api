@@ -100,7 +100,7 @@ func UpdateCompany(companyId string, company dto.UpdateCompanyDTO) (models.Compa
 	currentCompany, err := repository.GetCompanyById(numericId)
 
 	//Check if location should be changed
-	location, hadUpdate, err := reviewLocationAndUpdate(currentCompany.Location, company.Location)
+	location, hadUpdate, err := ReviewLocationAndUpdate(currentCompany.Location, company.Location)
 	if err != nil {
 		return models.Company{}, fmt.Errorf("error updating location: %s", err.Error())
 	}
@@ -149,7 +149,7 @@ func reviewOwnerAndUpdate(oldOwner models.Owner, newOwner dto.OwnerDTO) (models.
 		shouldUpdate = true
 	}
 
-	location, hadUpdate, err := reviewLocationAndUpdate(oldOwner.Location, newOwner.Location)
+	location, hadUpdate, err := ReviewLocationAndUpdate(oldOwner.Location, newOwner.Location)
 	if err != nil {
 		return models.Owner{}, true, fmt.Errorf("error updating owner location: %s", err.Error())
 	}
@@ -158,6 +158,7 @@ func reviewOwnerAndUpdate(oldOwner models.Owner, newOwner dto.OwnerDTO) (models.
 	}
 
 	if shouldUpdate {
+		updateModel.LocationId = oldOwner.LocationId
 		owner, err := repository.UpdateOwner(oldOwner.Id, updateModel)
 		if err != nil {
 			return owner, true, err
@@ -166,40 +167,4 @@ func reviewOwnerAndUpdate(oldOwner models.Owner, newOwner dto.OwnerDTO) (models.
 	}
 
 	return models.Owner{}, false, nil
-}
-
-func reviewLocationAndUpdate(oldLocation models.Location, newLocation dto.LocationDTO) (models.Location, bool, error) {
-	updateModel := models.Location{Id: oldLocation.Id}
-	var shouldUpdate = false
-
-	if (oldLocation.Address != newLocation.Address) && (newLocation.Address != "") {
-		updateModel.Address = newLocation.Address
-		shouldUpdate = true
-	}
-
-	if (oldLocation.ZipCode != newLocation.ZipCode) && (newLocation.ZipCode != "") {
-		updateModel.ZipCode = newLocation.ZipCode
-		shouldUpdate = true
-	}
-
-	if ((newLocation.City != "") || (newLocation.Country != "")) &&
-		((oldLocation.City.Name != newLocation.City) || (oldLocation.City.Country != newLocation.Country)) {
-
-		updateModel.City = models.City{
-			Name:    newLocation.City,
-			Country: newLocation.Country,
-		}
-		shouldUpdate = true
-	}
-
-	if shouldUpdate {
-		location, err := repository.UpdateLocation(oldLocation.Id, updateModel)
-		if err != nil {
-			return location, true, err
-		}
-		return location, true, nil
-	}
-
-	return models.Location{}, false, nil
-
 }

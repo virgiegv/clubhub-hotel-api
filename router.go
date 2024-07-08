@@ -35,8 +35,9 @@ func (r *Router) Init() {
 			franchiseGroup.POST("", controllers.CreateFranchise)
 			franchiseGroup.GET("/", controllers.GetFranchiseByFilters)
 			franchiseGroup.GET("/:franchise_id", controllers.GetFranchiseById)
-
+			franchiseGroup.PATCH("/:franchise_id", controllers.UpdateFranchiseWebSiteDataAutomatically)
+			franchiseGroup.PUT("/:franchise_id", controllers.UpdateFranchise)
 		}
-	}
 
+	}
 }

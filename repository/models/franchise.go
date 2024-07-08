@@ -6,14 +6,14 @@ import (
 )
 
 type Franchise struct {
-	Id            int64 `json:"id" gorm:"primaryKey"`
-	CompanyId     int64
-	Name          string
-	Url           string
-	WebsideDataId int64
-	WebsiteData   FranchiseWebSite `gorm:"foreignKey:WebsideDataId"`
-	LocationId    int64
-	Location      Location `gorm:"foreignKey:LocationId"`
+	Id            int64            `json:"id" gorm:"primaryKey"`
+	CompanyId     int64            `json:"company_id"`
+	Name          string           `json:"name"`
+	Url           string           `json:"url"`
+	WebsideDataId int64            `json:"website_data_id"`
+	WebsiteData   FranchiseWebSite `gorm:"foreignKey:WebsideDataId" json:"website_data"`
+	LocationId    int64            `json:"location_id"`
+	Location      Location         `gorm:"foreignKey:LocationId" json:"location"`
 }
 
 func (f Franchise) String() string {
@@ -23,16 +23,16 @@ func (f Franchise) String() string {
 type FranchiseWebSite struct {
 	Id                    int64                  `json:"id" gorm:"primaryKey"`
 	LogoUrl               string                 `json:"logo_url"`
-	WebsiteCreationDate   string                 `json:"web_created_at"`
-	WebsiteExpirationDate string                 `json:"web_expires_at"`
+	WebsiteCreationDate   string                 `json:"domain_created_at"`
+	WebsiteExpirationDate string                 `json:"domain_expires_at"`
 	RegisteredTo          string                 `json:"registered_to"`
 	DomainContactEmail    string                 `json:"domain_contact_email"`
 	Port                  int                    `json:"port"`
 	Protocol              string                 `json:"protocol"`
 	Endpoints             []FranchiseWebEndpoint `json:"endpoints" gorm:"foreignKey:WebsiteId"`
 	LatestError           string                 `json:"latest_error"`
-	CreatedAt             time.Time
-	UpdatedAt             time.Time
+	CreatedAt             time.Time              `json:"created_at"`
+	UpdatedAt             time.Time              `json:"updated_at"`
 }
 
 type FranchiseWebEndpoint struct {

@@ -71,6 +71,17 @@ definitions:
       tax_number:
         type: string
     type: object
+  dto.UpdateFranchiseDTO:
+    properties:
+      company_id:
+        type: integer
+      location:
+        $ref: '#/definitions/dto.LocationDTO'
+      name:
+        type: string
+      url:
+        type: string
+    type: object
   models.City:
     properties:
       country:
@@ -103,22 +114,22 @@ definitions:
     type: object
   models.Franchise:
     properties:
-      companyId:
+      company_id:
         type: integer
       id:
         type: integer
       location:
         $ref: '#/definitions/models.Location'
-      locationId:
+      location_id:
         type: integer
       name:
         type: string
       url:
         type: string
-      websideDataId:
-        type: integer
-      websiteData:
+      website_data:
         $ref: '#/definitions/models.FranchiseWebSite'
+      website_data_id:
+        type: integer
     type: object
   models.FranchiseWebEndpoint:
     properties:
@@ -133,9 +144,13 @@ definitions:
     type: object
   models.FranchiseWebSite:
     properties:
-      createdAt:
+      created_at:
         type: string
       domain_contact_email:
+        type: string
+      domain_created_at:
+        type: string
+      domain_expires_at:
         type: string
       endpoints:
         items:
@@ -153,11 +168,7 @@ definitions:
         type: string
       registered_to:
         type: string
-      updatedAt:
-        type: string
-      web_created_at:
-        type: string
-      web_expires_at:
+      updated_at:
         type: string
     type: object
   models.Location:
@@ -311,7 +322,7 @@ paths:
       parameters:
       - description: body
         in: body
-        name: companyInfo
+        name: franchiseInfo
         required: true
         schema:
           $ref: '#/definitions/dto.CreateFranchiseDTO'
@@ -370,6 +381,50 @@ paths:
           schema:
             $ref: '#/definitions/models.Franchise'
       summary: Get franchise by id
+      tags:
+      - Franchise
+    patch:
+      description: Given a franchise id, runs its website data analysis again to update
+        automatically
+      parameters:
+      - description: Id of the franchise
+        in: path
+        name: franchise_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Franchise'
+      summary: Update franchise website data automatically
+      tags:
+      - Franchise
+    put:
+      description: Update a given franchise's main data and location data. This will
+        not update its website data.
+      parameters:
+      - description: Id of the franchise
+        in: path
+        name: franchise_id
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: franchiseInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateFranchiseDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Franchise'
+      summary: Update franchise data
       tags:
       - Franchise
 swagger: "2.0"

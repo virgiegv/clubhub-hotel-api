@@ -22,6 +22,6 @@ func main() {
 	router := Router{server: e}
 	router.Init()
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":8080"))
 
 }

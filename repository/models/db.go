@@ -1,9 +1,11 @@
 package models
 
 import (
+	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -17,10 +19,18 @@ type DBConnection struct {
 var dbInstance *DBConnection
 
 func Init() *DBConnection {
-
 	once.Do(func() {
-		dbURL := "postgres://postgres:1234@localhost:5432/clubhub"
-		//TO DO:    dsn := "host=localhost user=gorm password=gorm dbname=gorm port=5432 sslmode=disable TimeZone=Asia/Shanghai" instead?
+
+		dbHost := os.Getenv("DB_HOST")
+		dbPort := os.Getenv("DB_PORT")
+		dbUser := os.Getenv("DB_USER")
+		dbPassword := os.Getenv("DB_PASSWORD")
+		dbName := os.Getenv("DB_NAME")
+
+		//dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		//	dbHost, dbPort, dbUser, dbPassword, dbName)
+
+		dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
 
 		db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{
 			NowFunc: func() time.Time {

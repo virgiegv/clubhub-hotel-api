@@ -68,3 +68,79 @@ func getNumericIdFromString(idString string) (int64, error) {
 	}
 	return numericId, nil
 }
+
+func UpdateFranchiseWebSiteAutomatically(franchise_id string, context echo.Context) (models.Franchise, error) {
+	numericId, err := getNumericIdFromString(franchise_id)
+	if err != nil {
+		return models.Franchise{}, err
+	}
+
+	currentFranchise, err := repository.GetFranchiseById(numericId)
+	if err != nil {
+		return models.Franchise{}, err
+	}
+
+	website, err := UpdateFranchiseWebSiteData(currentFranchise.WebsideDataId, currentFranchise.Url, context)
+	currentFranchise.WebsiteData = website
+
+	if err != nil {
+		return currentFranchise, fmt.Errorf("could not update franchise website data: %s", err.Error())
+	}
+
+	return currentFranchise, nil
+}
+
+func UpdateFranchiseManually(updateFranchise dto.UpdateFranchiseDTO, franchise_id string) (models.Franchise, error) {
+	numericId, err := getNumericIdFromString(franchise_id)
+	if err != nil {
+		return models.Franchise{}, err
+	}
+
+	//get currentFranchise
+	currentFranchise, err := repository.GetFranchiseById(numericId)
+	if err != nil {
+		return models.Franchise{}, err
+	}
+
+	//check if location needs changes
+	location, hasUpdates, err := ReviewLocationAndUpdate(currentFranchise.Location, updateFranchise.Location)
+	if err != nil {
+		return currentFranchise, err
+	}
+
+	if hasUpdates {
+		currentFranchise.Location = location
+	}
+
+	updateModel := models.Franchise{
+		Id:            numericId,
+		WebsideDataId: currentFranchise.WebsideDataId,
+		LocationId:    currentFranchise.LocationId,
+	}
+
+	if updateFranchise.Company_id != 0 {
+		updateModel.CompanyId = updateFranchise.Company_id
+	} else {
+		updateModel.CompanyId = currentFranchise.CompanyId
+	}
+
+	if updateFranchise.Url != "" {
+		updateModel.Url = updateFranchise.Url
+	}
+
+	if updateFranchise.Name != "" {
+		updateModel.Name = updateFranchise.Name
+	}
+
+	newFranchise, err := repository.UpdateFranchiseById(updateModel, numericId)
+	if err != nil {
+		return newFranchise, fmt.Errorf("could not update franchise: %s", err.Error())
+	}
+
+	newFranchise.WebsiteData = currentFranchise.WebsiteData
+	newFranchise.WebsideDataId = currentFranchise.WebsideDataId
+	newFranchise.Location = currentFranchise.Location
+	newFranchise.LocationId = currentFranchise.LocationId
+
+	return newFranchise, nil
+}
