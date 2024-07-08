@@ -1,0 +1,430 @@
+definitions:
+  controllers.Health:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  dto.CreateCompanyDTO:
+    properties:
+      location:
+        $ref: '#/definitions/dto.LocationDTO'
+      name:
+        type: string
+      owner:
+        $ref: '#/definitions/dto.OwnerDTO'
+      tax_number:
+        type: string
+    required:
+    - location
+    - name
+    - owner
+    - tax_number
+    type: object
+  dto.CreateFranchiseDTO:
+    properties:
+      company_id:
+        type: integer
+      location:
+        $ref: '#/definitions/dto.LocationDTO'
+      name:
+        type: string
+      url:
+        type: string
+    required:
+    - company_id
+    - url
+    type: object
+  dto.LocationDTO:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      zip_code:
+        type: string
+    type: object
+  dto.OwnerDTO:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      location:
+        $ref: '#/definitions/dto.LocationDTO'
+      phone:
+        type: string
+    type: object
+  dto.UpdateCompanyDTO:
+    properties:
+      location:
+        $ref: '#/definitions/dto.LocationDTO'
+      name:
+        type: string
+      owner:
+        $ref: '#/definitions/dto.OwnerDTO'
+      tax_number:
+        type: string
+    type: object
+  dto.UpdateFranchiseDTO:
+    properties:
+      company_id:
+        type: integer
+      location:
+        $ref: '#/definitions/dto.LocationDTO'
+      name:
+        type: string
+      url:
+        type: string
+    type: object
+  models.City:
+    properties:
+      country:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.Company:
+    properties:
+      franchises:
+        items:
+          $ref: '#/definitions/models.Franchise'
+        type: array
+      id:
+        type: integer
+      location:
+        $ref: '#/definitions/models.Location'
+      locationId:
+        type: integer
+      name:
+        type: string
+      owner:
+        $ref: '#/definitions/models.Owner'
+      ownerId:
+        type: integer
+      taxNumber:
+        type: string
+    type: object
+  models.Franchise:
+    properties:
+      company_id:
+        type: integer
+      id:
+        type: integer
+      location:
+        $ref: '#/definitions/models.Location'
+      location_id:
+        type: integer
+      name:
+        type: string
+      url:
+        type: string
+      website_data:
+        $ref: '#/definitions/models.FranchiseWebSite'
+      website_data_id:
+        type: integer
+    type: object
+  models.FranchiseWebEndpoint:
+    properties:
+      id:
+        type: integer
+      ip_address:
+        type: string
+      server_name:
+        type: string
+      website_id:
+        type: integer
+    type: object
+  models.FranchiseWebSite:
+    properties:
+      created_at:
+        type: string
+      domain_contact_email:
+        type: string
+      domain_created_at:
+        type: string
+      domain_expires_at:
+        type: string
+      endpoints:
+        items:
+          $ref: '#/definitions/models.FranchiseWebEndpoint'
+        type: array
+      id:
+        type: integer
+      latest_error:
+        type: string
+      logo_url:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+      registered_to:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Location:
+    properties:
+      address:
+        type: string
+      city:
+        $ref: '#/definitions/models.City'
+      cityId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      zipCode:
+        type: string
+    type: object
+  models.Owner:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      location:
+        $ref: '#/definitions/models.Location'
+      locationId:
+        type: integer
+      phone:
+        type: string
+    type: object
+info:
+  contact:
+    email: vgil_22@hotmail.com
+    name: API Support
+    url: https://github.com/virgiegv/
+  description: This API manages the CRU operations of Clubhub's hotel franchises
+  title: Clubhub Hotel Franchise API
+  version: "1.0"
+paths:
+  /:
+    get:
+      description: Check health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Health'
+      summary: Check if service is active
+      tags:
+      - Health
+  /clubhub/api/v1/company:
+    post:
+      description: Create a company using its name, tax number, owner information,
+        and location
+      parameters:
+      - description: body
+        in: body
+        name: companyInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCompanyDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Company'
+      summary: Company Creation
+      tags:
+      - Company
+  /clubhub/api/v1/company/:
+    get:
+      description: Find a company by either its name or its tax number
+      parameters:
+      - description: Name of the company
+        in: query
+        name: name
+        type: string
+      - description: Tax number of the company
+        in: query
+        name: tax_number
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Company'
+            type: array
+      summary: Company search by filters
+      tags:
+      - Company
+  /clubhub/api/v1/company/{company_id}:
+    get:
+      description: Find a company by its id
+      parameters:
+      - description: Id of the company
+        in: path
+        name: company_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Company'
+      summary: Get company by id
+      tags:
+      - Company
+    put:
+      description: Find a company by its id and update it
+      parameters:
+      - description: Id of the company
+        in: path
+        name: company_id
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: companyInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCompanyDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Company'
+      summary: Update company by id
+      tags:
+      - Company
+  /clubhub/api/v1/franchise:
+    post:
+      description: Create a franchise using its name, url, associated company_id,
+        and location
+      parameters:
+      - description: body
+        in: body
+        name: franchiseInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateFranchiseDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Franchise'
+      summary: Franchise Creation
+      tags:
+      - Franchise
+  /clubhub/api/v1/franchise/:
+    get:
+      description: Find a franchise by name, url or associated company_id
+      parameters:
+      - description: Name of the franchise
+        in: query
+        name: name
+        type: string
+      - description: url of the franchise
+        in: query
+        name: url
+        type: string
+      - description: id of the company that owns the franchise
+        in: query
+        name: company_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Franchise'
+            type: array
+      summary: Franchise search by filters
+      tags:
+      - Franchise
+  /clubhub/api/v1/franchise/{franchise_id}:
+    get:
+      description: Find a franchise by its id
+      parameters:
+      - description: Id of the franchise
+        in: path
+        name: franchise_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Franchise'
+      summary: Get franchise by id
+      tags:
+      - Franchise
+    patch:
+      description: Given a franchise id, runs its website data analysis again to update
+        automatically
+      parameters:
+      - description: Id of the franchise
+        in: path
+        name: franchise_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Franchise'
+      summary: Update franchise website data automatically
+      tags:
+      - Franchise
+    put:
+      description: Update a given franchise's main data and location data. This will
+        not update its website data.
+      parameters:
+      - description: Id of the franchise
+        in: path
+        name: franchise_id
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: franchiseInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateFranchiseDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Franchise'
+      summary: Update franchise data
+      tags:
+      - Franchise
+swagger: "2.0"
