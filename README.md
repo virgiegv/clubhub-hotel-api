@@ -21,12 +21,12 @@ Alternatively, you can build it separately with these steps:
 9. Run ```swag init```
 10. Run ```go build main```
 
-###Debug mode 
+### Debug mode 
 If you run the project with docker-compose, I've left commented in the Dockerfile some instructions to install Delve debugger and run it in port 2345. If needed, a remote debugger can be configured to connect to this instance. 
 
-###Swagger
+### Swagger
 
-Access the Swagger: https://localhost:8080/clubhub/api/v1/swagger/index.html
+Access the Swagger once the server is running: https://localhost:8080/clubhub/api/v1/swagger/index.html
 
 ## Documentation
 
